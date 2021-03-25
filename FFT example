@@ -1,0 +1,41 @@
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+from qutip import *
+
+
+
+wc = 1.0 * 2 * np.pi
+wa = 1 * 2 * np.pi
+g = 0.05 * 2 * np.pi
+kappa = 0.75
+gamma = 0.25
+N = 15
+
+
+vac = tensor(basis(N,0),basis(2,0))
+a = tensor(destroy(N),qeye(2))
+sm = tensor(qeye(N),destroy(2))
+
+H = wc * a.dag() * a + wa * sm.dag() * sm + g * (a.dag() * sm + a * sm.dag())
+n_th = 0.25
+c_ops = [np.sqrt(kappa * (1 + n_th)) * a, np.sqrt(kappa * n_th) * a.dag(), np.sqrt(gamma) * sm]
+
+
+
+
+t_list = np.linspace(0,100,5000)
+corr = correlation_2op_1t(H,None,t_list,c_ops,a.dag(),a)
+wlist1,spec1 = spectrum_correlation_fft(t_list,corr)       #Utilization of fft
+
+fig, ax = plt.subplots(1, 1,figsize=(10,6))
+ax.plot(wlist1 / (2 * np.pi), spec1, 'b', lw=2)
+ax.legend()
+ax.set_xlabel('Frequency')
+ax.set_ylabel('Power spectrum')
+ax.set_title('Vacuum Rabi splitting')
+ax.set_xlim(0,2)
+plt.show()
+
+
+### From: http://physcai.com/wp-content/uploads/2018/05/Quantum_Optics2.html
